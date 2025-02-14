@@ -1,5 +1,5 @@
 train: train/images  
 val: validation/images  
 
-nc: 4  # Số lượng lớp
-names: ['motorbike', 'car', 'truck', 'bus']  # Tên các lớp
+nc: 8  # Số lượng lớp
+names: ['xe máy', 'ô tô', 'xe tải', 'xe buýt', 'xe ba gác', 'xe xích lô', 'xe tải nhỏ', 'xe khách'] 
