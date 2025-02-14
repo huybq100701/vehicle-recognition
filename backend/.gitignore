@@ -1,0 +1,16 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+/__pycache__
+/datasets/train/images
+/datasets/train/labels
+/datasets/train/labels.cache
+/datasets/validation/images
+/datasets/validation/labels
+/datasets/validation/labels.cache
+
+/model/vehicle_model.h5
+/runs
+/uploaded_training_data
+/utils/__pycache__
+
+/venv
