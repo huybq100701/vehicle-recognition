@@ -104,5 +104,68 @@ def predict():
 
     return jsonify({"results": all_predictions})
 
+
+@app.route('/generate-labels', methods=['POST'])
+def generate_labels():
+    if 'files[]' not in request.files:
+        return jsonify({"error": "No files uploaded"}), 400
+
+    files = request.files.getlist('files[]')
+    labels_dir = os.path.join(UPLOAD_FOLDER, "generated_labels")
+    os.makedirs(labels_dir, exist_ok=True)
+
+    all_labels = []
+
+    for file in files:
+        try:
+            # Load and process image
+            image = Image.open(file)
+
+            # Run YOLO model
+            results = model(image)
+            detections = results.pandas().xyxy[0]
+
+            filename = os.path.splitext(file.filename)[0]
+            label_file_path = os.path.join(labels_dir, f"{filename}.txt")
+
+            label_lines = []
+
+            for _, row in detections.iterrows():
+                # Example: You may need to map to your class index if using custom class names
+                class_index = 0  # Placeholder. Replace with your actual class index if available.
+
+                # Normalize bounding box coordinates for YOLO format
+                img_width, img_height = image.size
+                x_center = ((row['xmin'] + row['xmax']) / 2) / img_width
+                y_center = ((row['ymin'] + row['ymax']) / 2) / img_height
+                box_width = (row['xmax'] - row['xmin']) / img_width
+                box_height = (row['ymax'] - row['ymin']) / img_height
+
+                # Format: "class_index x_center y_center width height"
+                label_line = f"{class_index} {x_center:.6f} {y_center:.6f} {box_width:.6f} {box_height:.6f}"
+                label_lines.append(label_line)
+
+            # Save label to file
+            with open(label_file_path, 'w') as label_file:
+                label_file.write("\n".join(label_lines))
+
+            # Normalize path to use forward slashes
+            normalized_label_path = label_file_path.replace(os.sep, "/")
+
+            # Collect label file info
+            all_labels.append({
+                "filename": file.filename,
+                "label_file": normalized_label_path
+            })
+
+        except Exception as e:
+            all_labels.append({
+                "filename": file.filename,
+                "error": f"Error processing image: {str(e)}"
+            })
+
+    return jsonify({"labels": all_labels})
+
+
 if __name__ == '__main__':
     app.run(debug=True)

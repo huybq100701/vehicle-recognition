@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import UploadForm from "./components/UploadForm";
-import TrainModelPage from "./components/TrainModal";
-
+import TrainModelPage from "./components/TrainModel";
+import GenerateLabelPage from "./components/GenerateLabel"; 
 function App() {
   const [currentPage, setCurrentPage] = useState("recognition");
 
@@ -16,13 +16,21 @@ function App() {
           Image Recognition
         </button>
         <button
-          style={{ padding: "6px 12px" }}
+          style={{ marginRight: "10px", padding: "6px 12px" }}
           onClick={() => setCurrentPage("train")}
         >
           Train Model
         </button>
+        <button
+          style={{ padding: "6px 12px" }}
+          onClick={() => setCurrentPage("generate-label")}
+        >
+          Generate Label
+        </button>
       </nav>
-      {currentPage === "recognition" ? <UploadForm /> : <TrainModelPage />}
+      {currentPage === "recognition" && <UploadForm />}
+      {currentPage === "train" && <TrainModelPage />}
+      {currentPage === "generate-label" && <GenerateLabelPage />}
     </div>
   );
 }
