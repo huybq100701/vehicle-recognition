@@ -60,5 +60,49 @@ def get_plot():
     else:
         return jsonify({"error": "Training plot not found"}), 404
 
+@app.route('/predict', methods=['POST'])
+def predict():
+    if 'files[]' not in request.files:
+        print("No files[] found in request")
+        return jsonify({"error": "No files uploaded"}), 400
+
+    files = request.files.getlist('files[]')
+    print(f"Number of files received: {len(files)}")
+
+    all_predictions = []
+
+    for file in files:
+        try:
+            # Load and process image
+            image = Image.open(file)
+
+            # Run YOLO model
+            results = model(image)
+
+            # Extract predictions
+            detections = results.pandas().xyxy[0]
+
+            predictions = []
+            for _, row in detections.iterrows():
+                predictions.append({
+                    "predicted_class": row['name'],
+                    "confidence": f"{row['confidence']:.2%}",
+                    "bounding_box": [row['xmin'], row['ymin'], row['xmax'], row['ymax']]
+                })
+
+            # Append predictions for each image
+            all_predictions.append({
+                "filename": file.filename,
+                "predictions": predictions
+            })
+        except Exception as e:
+            print(f"Error processing {file.filename}: {str(e)}")
+            all_predictions.append({
+                "filename": file.filename,
+                "error": f"Error processing image: {str(e)}"
+            })
+
+    return jsonify({"results": all_predictions})
+
 if __name__ == '__main__':
     app.run(debug=True)
