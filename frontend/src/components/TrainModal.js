@@ -5,12 +5,15 @@ const TrainModelPage = () => {
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [trainingLogs, setTrainingLogs] = useState([]);
   const [plotUrl, setPlotUrl] = useState("");
-
+  const [loading,  setLoading] = useState(false)
   const handleFolderChange = (e) => {
     setSelectedFolder(e.target.files);
   };
 
   const handleTrainSubmit = async (e) => {
+    setLoading(true)
+    setTrainingLogs([])
+    setPlotUrl("")
     e.preventDefault();
     if (!selectedFolder || selectedFolder.length === 0) {
       alert("Please select a folder with images and labels!");
@@ -44,6 +47,8 @@ const TrainModelPage = () => {
       };
     } catch (error) {
       alert("An error occurred while starting the training.");
+    } finally{
+      setLoading(false)
     }
   };
 
@@ -64,6 +69,8 @@ const TrainModelPage = () => {
         />
         <button
           type="submit"
+          loading={loading}
+          disabled={loading}
           style={{
             marginTop: "20px",
             padding: "6px 12px",
